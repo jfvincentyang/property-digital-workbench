@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tlvin｜物业数字化与基层减负工具实践</title>
+<meta name="description" content="物业运营管理者 tlvin 的数字化实践：物业巡查、任务台账、知识库、会议执行与招聘流程工具。">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#16395e">
+<link rel="canonical" href="https://jfvincentyang.github.io/property-digital-workbench/">
+<link rel="icon" href="/property-digital-workbench/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="tlvin · 物业数字化实践">
+<meta property="og:title" content="tlvin｜物业数字化与基层减负工具实践">
+<meta property="og:description" content="把重复劳动交给工具，把判断和沟通留给人。记录物业巡查、任务、知识库与会议执行的数字化实践。">
+<meta property="og:url" content="https://jfvincentyang.github.io/property-digital-workbench/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tlvin｜物业数字化与基层减负工具实践">
+<meta name="twitter:description" content="物业运营管理者的基层减负工具与开源实践。">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://jfvincentyang.github.io/property-digital-workbench/#person",
+      "name": "tlvin",
+      "url": "https://jfvincentyang.github.io/property-digital-workbench/",
+      "sameAs": ["https://github.com/jfvincentyang"],
+      "jobTitle": "物业数字化中层管理者",
+      "knowsAbout": ["物业运营", "行政人事", "品质管理", "基层数字化", "AI 辅助办公"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://jfvincentyang.github.io/property-digital-workbench/#website",
+      "url": "https://jfvincentyang.github.io/property-digital-workbench/",
+      "name": "tlvin｜物业数字化与基层减负工具实践",
+      "inLanguage": "zh-CN",
+      "author": {"@id": "https://jfvincentyang.github.io/property-digital-workbench/#person"}
+    }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.cn" crossorigin>
+<link href="https://fonts.googleapis.cn/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6fa; --panel:#ffffff; --side:#ffffff;
+    --line:#e6eaf1; --line2:#eef1f6;
+    --ink:#1b2735; --muted:#6a7b8d; --muted2:#9aa8b8;
+    --navy:#16395e; --blue:#1f5b88; --red:#d11a2a; --red-soft:#fbeaec;
+    --ok:#2f8f63; --ok-soft:#e7f3ec;
+    --font-display:"Fraunces","Songti SC",Georgia,serif;
+    --font-sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,Segoe UI,sans-serif;
+    --font-mono:"JetBrains Mono","SF Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  .sr-only{position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-sans);
+    line-height:1.7; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    /* 极淡网格底纹 */
+    background-image:
+      linear-gradient(rgba(22,57,94,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(22,57,94,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center top;
+  }
+  ::selection{background:var(--red); color:#fff;}
+  a{color:inherit; text-decoration:none;}
+
+  .app{display:grid; grid-template-columns:264px 1fr; min-height:100vh;}
+
+  /* ===== 侧边栏 ===== */
+  .side{position:sticky; top:0; align-self:start; height:100vh; background:var(--side);
+    border-right:1px solid var(--line); padding:28px 22px; display:flex; flex-direction:column; gap:24px;
+    z-index:100;}
+  .id{display:flex; align-items:center; gap:14px;}
+  .avatar{width:52px; height:52px; border-radius:14px; background:var(--navy);
+    display:grid; place-items:center; font-family:var(--font-display); font-weight:700; font-size:22px; color:#fff; flex:0 0 auto;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .avatar:hover{transform:scale(1.05) rotate(-3deg);}
+  .id .nm{font-family:var(--font-display); font-weight:700; font-size:21px; line-height:1;}
+  .id .rl{font-size:12.5px; color:var(--muted); margin-top:5px;}
+  .side .status{font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:8px;}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--ok);
+    animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:.6; transform:scale(.85);}}
+
+  .nav{display:flex; flex-direction:column; gap:5px;}
+  .nav a{display:flex; align-items:center; gap:12px; padding:11px 13px; border-radius:11px; color:var(--muted);
+    font-weight:600; font-size:14.5px; transition:.2s cubic-bezier(.4,0,.2,1); position:relative;}
+  .nav a .ix{font-family:var(--font-mono); font-size:11px; color:var(--muted2); width:20px; text-align:center;}
+  .nav a:hover{background:var(--line2); color:var(--ink); transform:translateX(3px);}
+  .nav a.active{background:var(--navy); color:#fff; box-shadow:0 4px 12px rgba(22,57,94,.25);}
+  .nav a.active .ix{color:rgba(255,255,255,.7);}
+  .side .foot{margin-top:auto; font-size:11.5px; color:var(--muted2); line-height:1.7;}
+
+  /* ===== 移动端汉堡菜单 ===== */
+  .menu-toggle{display:none; width:40px; height:40px; border:none; background:transparent; cursor:pointer;
+    flex-direction:column; justify-content:center; align-items:center; gap:5px; padding:0;}
+  .menu-toggle span{display:block; width:22px; height:2px; background:var(--navy); border-radius:2px;
+    transition:.3s cubic-bezier(.4,0,.2,1);}
+  .menu-toggle.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+  .menu-toggle.active span:nth-child(2){opacity:0;}
+  .menu-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+
+  /* ===== 主内容区 ===== */
+  .main{min-width:0; padding-bottom:50px;}
+  .topbar{position:sticky; top:0; z-index:40; background:rgba(244,246,250,.92); backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line); padding:15px 40px; display:flex; align-items:center; justify-content:space-between;}
+  .topbar .crumb{display:flex; align-items:center; gap:9px; font-weight:600; color:var(--ink);}
+  .topbar .crumb .here{color:var(--navy);}
+  .topbar .tagr{font-size:12.5px; color:var(--muted);}
+
+  .content{padding:42px 40px 0; display:flex; flex-direction:column; gap:52px;}
+  .block{scroll-margin-top:76px;}
+  .block-h{display:flex; align-items:baseline; gap:14px; margin-bottom:22px;}
+  .block-h .k{font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--red); letter-spacing:1px;}
+  .block-h h2{margin:0; font-family:var(--font-display); font-weight:700; font-size:26px; letter-spacing:-.3px;}
+  .block-h .ln{flex:1; height:1px; background:linear-gradient(90deg, var(--line), transparent);}
+
+  /* ===== 概览区 ===== */
+  .ov{display:grid; grid-template-columns:1.15fr 1fr; gap:20px;}
+  .idcard{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:32px;
+    box-shadow:0 1px 3px rgba(20,40,70,.05), 0 8px 24px rgba(20,40,70,.04);
+    transition:box-shadow .3s, transform .3s;}
+  .idcard:hover{box-shadow:0 4px 12px rgba(20,40,70,.08), 0 16px 48px rgba(20,40,70,.06); transform:translateY(-2px);}
+  .idcard .tag{font-family:var(--font-mono); font-size:11px; color:var(--blue); letter-spacing:1.5px; font-weight:700;}
+  .idcard .name-display{font-family:var(--font-display); font-weight:700; font-size:clamp(42px,6vw,60px); margin:8px 0 6px; line-height:.95;}
+  .idcard .name-display .d{color:var(--red); display:inline-block; animation:blink 3s ease-in-out infinite;}
+  @keyframes blink{0%,90%,100%{opacity:1;} 95%{opacity:.3;}}
+  .idcard .role{font-size:15px; color:var(--muted); font-weight:600;}
+  .idcard p{font-size:14px; color:#54657a; margin:16px 0 0; max-width:46ch;}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:18px;}
+  .chip{font-size:11.5px; padding:5px 12px; border-radius:999px; background:#eaf1f8; color:var(--blue); font-weight:600;
+    transition:transform .2s, box-shadow .2s; cursor:default;}
+  .chip:hover{transform:translateY(-2px); box-shadow:0 4px 8px rgba(31,91,136,.15);}
+  .chip.r{background:var(--red-soft); color:var(--red);}
+  .chip.r:hover{box-shadow:0 4px 8px rgba(209,26,42,.15);}
+
+  .stats{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .stat{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px 18px;
+    box-shadow:0 1px 3px rgba(20,40,70,.05); position:relative; overflow:hidden; transition:.25s cubic-bezier(.4,0,.2,1);
+    cursor:default;}
+  .stat:hover{transform:translateY(-4px); box-shadow:0 12px 28px rgba(20,40,70,.1); border-color:#d3deea;}
+  .stat .v{font-family:var(--font-mono); font-weight:700; font-size:40px; line-height:1; color:var(--navy);
+    transition:color .2s;}
+  .stat:hover .v{color:var(--red);}
+  .stat .v small{font-family:var(--font-sans); font-size:17px; color:var(--red); margin-left:1px;}
+  .stat .l{font-size:12.5px; color:var(--muted); margin-top:9px;}
+  .stat .bar{position:absolute; left:0; bottom:0; height:3px; width:100%; background:linear-gradient(90deg,var(--blue),var(--red)); opacity:.85;
+    transform:scaleX(0); transform-origin:left; transition:transform .4s cubic-bezier(.4,0,.2,1);}
+  .stat:hover .bar{transform:scaleX(1);}
+
+  /* ===== 职责面板 ===== */
+  .roles{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .role{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:22px;
+    box-shadow:0 1px 3px rgba(20,40,70,.05); transition:.25s cubic-bezier(.4,0,.2,1); cursor:default;}
+  .role:hover{transform:translateY(-4px); box-shadow:0 12px 28px rgba(20,40,70,.1); border-color:#d3deea;}
+  .role .num{font-family:var(--font-mono); font-size:12px; color:var(--muted2); font-weight:700;}
+  .role h3{margin:10px 0 9px; font-size:16.5px; color:var(--navy); display:flex; align-items:center; gap:9px;}
+  .role h3 .ic{width:8px; height:8px; border-radius:2px; background:var(--red);
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+  .role:hover h3 .ic{transform:rotate(45deg) scale(1.2);}
+  .role p{margin:0; font-size:13px; color:var(--muted); line-height:1.65;}
+
+  /* ===== 工具矩阵 ===== */
+  .matrix{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  .mod{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:22px;
+    display:flex; flex-direction:column; gap:11px; transition:.25s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 1px 3px rgba(20,40,70,.05); position:relative;}
+  .mod::after{content:"↗"; position:absolute; top:18px; right:18px; font-size:14px; color:var(--muted2);
+    opacity:0; transform:translate(-4px,4px); transition:.25s cubic-bezier(.4,0,.2,1);}
+  .mod:hover{transform:translateY(-4px); box-shadow:0 14px 32px rgba(20,40,70,.12); border-color:var(--blue);}
+  .mod:hover::after{opacity:1; transform:translate(0,0);}
+  .mod .hd{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .mod h3{margin:0; font-size:17.5px; color:var(--navy); transition:color .2s;}
+  .mod:hover h3{color:var(--blue);}
+  .mod .s{font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--ok); background:var(--ok-soft); padding:3px 9px; border-radius:999px;}
+  .mod p{margin:0; font-size:13px; color:var(--muted); flex:1;}
+  .mod .tg{display:flex; gap:7px; flex-wrap:wrap;}
+  .mod .tg span{font-size:11px; color:var(--blue); background:#eaf1f8; padding:3px 10px; border-radius:7px; font-weight:600;
+    transition:background .2s, color .2s;}
+  .mod:hover .tg span{background:var(--blue); color:#fff;}
+  .mod .lk{font-size:13px; font-weight:700; color:var(--red); display:flex; align-items:center; gap:4px;}
+  .mod .lk::after{content:"→"; transition:transform .2s;}
+  .mod:hover .lk::after{transform:translateX(4px);}
+
+  /* ===== 时间线 ===== */
+  .tl{position:relative; padding-left:26px;}
+  .tl::before{content:""; position:absolute; left:7px; top:6px; bottom:6px; width:2px; background:linear-gradient(to bottom, var(--blue), var(--red)); opacity:.3;}
+  .tl .it{position:relative; padding:0 0 24px 4px;}
+  .tl .it::before{content:""; position:absolute; left:-23px; top:4px; width:11px; height:11px; border-radius:50%; background:var(--navy);
+    border:2px solid var(--panel); box-shadow:0 0 0 2px var(--navy); transition:.3s cubic-bezier(.34,1.56,.64,1);}
+  .tl .it:hover::before{transform:scale(1.3); background:var(--red); box-shadow:0 0 0 3px var(--red-soft);}
+  .tl .it .yr{font-family:var(--font-mono); font-size:12px; color:var(--blue); font-weight:600;}
+  .tl .it h3{margin:4px 0 4px; font-size:15.5px; color:var(--navy); transition:color .2s;}
+  .tl .it:hover h3{color:var(--red);}
+  .tl .it p{margin:0; font-size:13px; color:var(--muted);}
+
+  /* ===== 联系区 ===== */
+  .contact{background:linear-gradient(135deg, var(--navy) 0%, #0f2a4a 100%); border-radius:18px; padding:34px;
+    display:flex; flex-wrap:wrap; gap:24px; align-items:center; justify-content:space-between;
+    position:relative; overflow:hidden;}
+  .contact::before{content:""; position:absolute; top:-50%; right:-20%; width:400px; height:400px; border-radius:50%;
+    background:rgba(233,69,96,.08); filter:blur(60px); pointer-events:none;}
+  .contact .txt{position:relative; z-index:1;}
+  .contact .txt h3{margin:0 0 7px; font-family:var(--font-display); font-size:23px; color:#fff;}
+  .contact .txt p{margin:0; color:rgba(255,255,255,.8); font-size:14px;}
+  .contact .acts{display:flex; gap:12px; flex-wrap:wrap; position:relative; z-index:1;}
+  .btn{font-size:13.5px; font-weight:700; padding:12px 22px; border-radius:11px; border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.1); color:#fff; transition:.2s cubic-bezier(.4,0,.2,1); display:flex; align-items:center; gap:8px;}
+  .btn:hover{transform:translateY(-2px); background:rgba(255,255,255,.18); box-shadow:0 8px 20px rgba(0,0,0,.2);}
+  .btn.r{background:var(--red); border-color:var(--red);}
+  .btn.r:hover{background:#e01e2f; box-shadow:0 8px 20px rgba(209,26,42,.3);}
+  .btn svg{width:16px; height:16px; fill:currentColor;}
+
+  footer{padding:30px 40px 0; color:var(--muted2); font-size:12px;}
+
+  /* ===== 动画 ===== */
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1; transform:none;}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1; transform:none; transition:none;}}
+
+  /* ===== 响应式 ===== */
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr;}
+    .main{padding-top:81px;}
+    .side{position:fixed; top:0; left:0; right:0; height:auto; flex-direction:row; flex-wrap:wrap; align-items:center;
+      gap:0; border-right:none; border-bottom:1px solid var(--line); padding:14px 20px; z-index:200;
+      justify-content:space-between;}
+    .side .id{gap:10px;}
+    .side .status{display:none;}
+    .nav{position:fixed; top:81px; left:0; right:0; background:var(--side); border-bottom:1px solid var(--line);
+      padding:12px 20px; flex-direction:column; gap:3px; transform:translateY(-100%); opacity:0; pointer-events:none;
+      transition:transform .35s cubic-bezier(.4,0,.2,1), opacity .25s; z-index:199;}
+    .nav.open{transform:translateY(0); opacity:1; pointer-events:auto;}
+    .nav a{padding:12px 14px; border-radius:10px;}
+    .nav a:hover{transform:none;}
+    .menu-toggle{display:flex;}
+    .side .foot{display:none;}
+    .ov,.roles,.matrix{grid-template-columns:1fr;}
+    .stats{grid-template-columns:1fr 1fr;}
+    .topbar{display:none;} .content{padding:30px 20px 0;} footer{padding:24px 20px 0;}
+    .contact{padding:24px;}
+  }
+  @media(max-width:420px){
+    .stats{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="side">
+    <div class="id">
+      <div class="avatar">TL</div>
+      <div>
+        <div class="nm">tlvin</div>
+        <div class="rl">物业数字化中层</div>
+      </div>
+    </div>
+    <div class="status"><span class="dot"></span> 在线 · 基层减负中</div>
+    <button class="menu-toggle" id="menuToggle" aria-label="菜单" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav">
+      <a href="#overview" class="active"><span class="ix">01</span> 概览</a>
+      <a href="#roles"><span class="ix">02</span> 职责面板</a>
+      <a href="#matrix"><span class="ix">03</span> 工具矩阵</a>
+      <a href="#timeline"><span class="ix">04</span> 建设时间线</a>
+      <a href="#contact"><span class="ix">05</span> 联系</a>
+    </nav>
+    <div class="foot">
+      EST · 上海<br>
+      行政 / 品质 / 党务<br>
+      个人工作台 · 静态页
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1 class="sr-only">tlvin｜物业数字化与基层减负工具实践</h1>
+    <div class="topbar">
+      <div class="crumb">tlvin 的工作台 <span style="color:var(--muted2)">/</span> <span class="here" id="crumb">概览</span></div>
+      <div class="tagr">用数字化工具为基层物业减负</div>
+    </div>
+
+    <div class="content">
+
+      <section id="overview" class="block">
+        <div class="block-h"><span class="k">01</span><h2>概览</h2><span class="ln"></span></div>
+        <div class="ov">
+          <div class="idcard reveal">
+            <div class="tag">PROPERTY OPS · DIGITAL TOOLS</div>
+            <div class="name-display">tlvin<span class="d">.</span></div>
+            <div class="role">某物业管理有限公司 · 行政人事 / 品质 / 党务 中层管理</div>
+            <p>管着 8 个物业项目、约 60 万方、2000+ 车位、115 台电梯，外加外包结算审批。事多但不想被事推着走——把重复活交给工具，精力留给决策。</p>
+            <div class="chips">
+              <span class="chip r">用 AI 给自己减负</span>
+              <span class="chip">基层物业数字化</span>
+              <span class="chip">Node.js / Python</span>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat reveal"><div class="v">8</div><div class="l">统筹物业项目</div><div class="bar"></div></div>
+            <div class="stat reveal"><div class="v">60<small>万方</small></div><div class="l">管理面积</div><div class="bar"></div></div>
+            <div class="stat reveal"><div class="v">2000<small>+</small></div><div class="l">车位资源</div><div class="bar"></div></div>
+            <div class="stat reveal"><div class="v">115</div><div class="l">在管电梯</div><div class="bar"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="roles" class="block">
+        <div class="block-h"><span class="k">02</span><h2>职责面板</h2><span class="ln"></span></div>
+        <div class="roles">
+          <div class="role reveal"><div class="num">01</div><h3><span class="ic"></span>日常管理</h3><p>8 个项目统筹、外包人员结算审批、品质单据与周报闭环，把琐碎流程跑成系统。</p></div>
+          <div class="role reveal"><div class="num">02</div><h3><span class="ic"></span>党务与合规</h3><p>主题党日活动录入、合同与离职表合规风险审查，抓会咬人的那条。</p></div>
+          <div class="role reveal"><div class="num">03</div><h3><span class="ic"></span>工具落地</h3><p>用 AI 造内部工具，部署 Render / 腾讯云，Obsidian 记笔记，能甩给 AI 的绝不自己动手。</p></div>
+        </div>
+      </section>
+
+      <section id="matrix" class="block">
+        <div class="block-h"><span class="k">03</span><h2>工具矩阵</h2><span class="ln"></span></div>
+        <div class="matrix">
+          <a class="mod reveal" href="https://github.com/jfvincentyang/office-task-ledger" target="_blank" rel="noopener noreferrer">
+            <div class="hd"><h3>办公室任务台账</h3><span class="s">已开源</span></div>
+            <p>本地优先的办公室任务台账小软件，自动算优先级、催办话术、CSV 导入导出。</p>
+            <div class="tg"><span>本地软件</span><span>任务管理</span></div>
+            <span class="lk">查看仓库</span>
+          </a>
+          <a class="mod reveal" href="https://github.com/jfvincentyang/inspection-system" target="_blank" rel="noopener noreferrer">
+            <div class="hd"><h3>物业巡查系统</h3><span class="s">已开源</span></div>
+            <p>基于企业微信的物业巡查管理 MVP：任务模板、移动端巡检、报告生成与 PDF 导出。</p>
+            <div class="tg"><span>Vue3</span><span>Express</span><span>SQLite</span></div>
+            <span class="lk">查看仓库</span>
+          </a>
+          <a class="mod reveal" href="https://github.com/jfvincentyang/Initial-property-knowledge-base-MVP" target="_blank" rel="noopener noreferrer">
+            <div class="hd"><h3>物业知识库 MVP</h3><span class="s">已开源</span></div>
+            <p>物业政策与流程知识库，模型问答 + 文件导入，部署于 Render。</p>
+            <div class="tg"><span>Node.js</span><span>SQLite</span><span>AI 问答</span></div>
+            <span class="lk">查看仓库</span>
+          </a>
+          <a class="mod reveal" href="https://github.com/jfvincentyang/meeting-execution-agent-mvp" target="_blank" rel="noopener noreferrer">
+            <div class="hd"><h3>会议执行 Agent</h3><span class="s">已开源</span></div>
+            <p>把会议纪要转成结构化执行数据，落库、建内部任务、逾期/临近提醒。</p>
+            <div class="tg"><span>Python</span><span>FastAPI</span><span>Agent</span></div>
+            <span class="lk">查看仓库</span>
+          </a>
+          <a class="mod reveal" href="https://github.com/jfvincentyang/hireflow" target="_blank" rel="noopener noreferrer">
+            <div class="hd"><h3>hireflow</h3><span class="s">已开源</span></div>
+            <p>招聘流程管理工具，Prisma + Next.js + TypeScript 实现。</p>
+            <div class="tg"><span>Next.js</span><span>Prisma</span><span>TS</span></div>
+            <span class="lk">查看仓库</span>
+          </a>
+          <a class="mod reveal" href="https://github.com/jfvincentyang/feishu-meeting-minutes" target="_blank" rel="noopener noreferrer">
+            <div class="hd"><h3>飞书会议纪要技能</h3><span class="s">已开源</span></div>
+            <p>飞书会议纪要处理技能包，含脚本与可复用流程。</p>
+            <div class="tg"><span>飞书</span><span>自动化</span></div>
+            <span class="lk">查看仓库</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="timeline" class="block">
+        <div class="block-h"><span class="k">04</span><h2>建设时间线</h2><span class="ln"></span></div>
+        <div class="tl">
+          <div class="it reveal"><div class="yr">2025 · Q2</div><h3>任务台账起步</h3><p>从一张 CSV 周报模板，做成能自动算优先级、生成催办话术的本地台账软件。</p></div>
+          <div class="it reveal"><div class="yr">2025 · Q3</div><h3>巡查系统上线</h3><p>基于企业微信搭出物业巡查 MVP，移动端巡检 + 报告 PDF 导出。</p></div>
+          <div class="it reveal"><div class="yr">2025 · Q4</div><h3>知识库与 Agent</h3><p>物业知识库 MVP 部署 Render；会议执行 Agent 把纪要转成可跟踪任务。</p></div>
+          <div class="it reveal"><div class="yr">2026 · 至今</div><h3>工具链整合</h3><p>hireflow、飞书纪要等技能补齐，用 AI 把日常流程串成一套减负系统。</p></div>
+        </div>
+      </section>
+
+      <section id="contact" class="block">
+        <div class="block-h"><span class="k">05</span><h2>联系</h2><span class="ln"></span></div>
+        <div class="contact reveal">
+          <div class="txt">
+            <h3>想聊聊物业数字化？</h3>
+            <p>看代码、提需求，或只是交换下基层减负的心得，都欢迎。</p>
+          </div>
+          <div class="acts">
+            <a class="btn" href="https://github.com/jfvincentyang" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+            <a class="btn r" href="https://github.com/jfvincentyang" target="_blank" rel="noopener noreferrer">
+              在 GitHub 联系
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer>© <span id="y"></span> tlvin · 某物业管理有限公司 · 用数字化工具为基层物业减负 · 静态页面，内容可自由修改</footer>
+    </div>
+  </main>
+</div>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // 滚动渐入
+  const io = new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // 导航联动
+  const secs=['overview','roles','matrix','timeline','contact'];
+  const navLinks=[...document.querySelectorAll('#nav a')];
+  const labels={overview:'概览',roles:'职责面板',matrix:'工具矩阵',timeline:'建设时间线',contact:'联系'};
+  const navIo=new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){
+      const id=e.target.id;
+      navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+id));
+      document.getElementById('crumb').textContent=labels[id];
+    }});
+  },{rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(id=>{const el=document.getElementById(id); if(el) navIo.observe(el);});
+
+  // 移动端汉堡菜单
+  const menuToggle = document.getElementById('menuToggle');
+  const nav = document.getElementById('nav');
+  function setMenu(open) {
+    menuToggle.classList.toggle('active', open);
+    nav.classList.toggle('open', open);
+    menuToggle.setAttribute(`aria-expanded`, String(open));
+  }
+  menuToggle.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
+  // 点击导航项后关闭菜单
+  navLinks.forEach(a => {
+    a.addEventListener('click', () => {
+      setMenu(false);
+    });
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && nav.classList.contains('open')) {
+      setMenu(false);
+      menuToggle.focus();
+    }
+  });
+</script>
+</body>
+</html>
