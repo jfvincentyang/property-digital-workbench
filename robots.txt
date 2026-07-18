@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jfvincentyang.github.io/property-digital-workbench/sitemap.xml
